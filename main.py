@@ -18,7 +18,7 @@ class form(QMainWindow):
         self.model.setEditStrategy(QtSql.QSqlTableModel.OnFieldChange)
         self.model.select()
 
-        self.model.setHeaderData(1, QtCore.Qt.Horizontal,"نام کالا")
+        self.model.setHeaderData(1, QtCore.Qt.Horizontal,"ن ک")
         self.model.setHeaderData(2, QtCore.Qt.Horizontal,"صرفه جویی")
         self.model.setHeaderData(3, QtCore.Qt.Horizontal,"مقدار/تعداد")
         self.ui.tableWidget.setModel(self.model)
@@ -36,7 +36,6 @@ class form(QMainWindow):
 
     def coming_back(self):
         try:
-            record = self.model.record(self.ui.tableWidget.currentIndex().row())
             sqliteCon = sqlite3.connect('fieldlist.db')
             cursor = sqliteCon.cursor()
             print('connected to sqlite')
@@ -50,9 +49,7 @@ class form(QMainWindow):
             sqliteCon.commit()
             print("Record Updated successfully ")
             cursor.close()
-            record.setValue("sj",0)
-            record.setValue("kg",kg)
-            self.model.setRecord(self.ui.tableWidget.currentIndex().row(), record)
+            self.model.submitAll
             
         except sqlite3.Error as error:
             print("Failed to update multiple records of sqlite table", error)
@@ -76,7 +73,7 @@ class form(QMainWindow):
         
         try:
             # sj et
-            # if self.ui.lineEdit.text() == '' :
+            # if self.ui.lineEdit.text() == 0 :
             self.model.setData(self.model.index(self.i,2), self.ui.lineEdit_2.text())
             # else:
                 # در صورت خالی بودن ماخذ را گرفته و محاسبه نماید. باید دکمه اضافه شود
