@@ -19,7 +19,7 @@ class Ui_Dialog(object):
         self.groupBox = QtWidgets.QGroupBox(self.centralwidget)
         self.groupBox.setGeometry(QtCore.QRect(0, 0, 671, 261))
         self.groupBox.setLayoutDirection(QtCore.Qt.RightToLeft)
-        self.groupBox.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.groupBox.setAlignment(QtCore.Qt.AlignLeft|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.groupBox.setObjectName("groupBox")
         self.lcdNumber = QtWidgets.QLCDNumber(self.groupBox)
         self.lcdNumber.setGeometry(QtCore.QRect(10, 30, 151, 81))
