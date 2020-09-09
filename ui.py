@@ -96,7 +96,7 @@ class Ui_MainWindow(object):
         self.label_2.setText(_translate("MainWindow", "صرفه جویی"))
         self.label_3.setText(_translate("MainWindow", "مقدار/تعداد"))
 
-        self.pushButton.setText(_translate("MainWindow", "افزودن"))
+        self.pushButton.setText(_translate("MainWindow", "ثبت"))
         self.pushButton_2.setText(_translate("MainWindow", "بروزرسانی"))
         self.pushButton_3.setText(_translate("MainWindow", "حذف"))
         self.pushButton_4.setText(_translate("MainWindow", "عودت"))

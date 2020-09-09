@@ -6,18 +6,19 @@ import pandas as pd
 import sqlite3
 from credit import *
 
+# https://www.learnpyqt.com/courses/packaging-and-distribution/packaging-pyqt5-pyside2-applications-windows-pyinstaller/
+# https://github.com/pyqt/examples
 class Controller:
-    
     def __init__(self):
         pass
 
     def Show_FirstWindow(self):
-
+    
         self.FirstWindow = QtWidgets.QMainWindow()
+        self.FirstWindow.setWindowIcon(QtGui.QIcon('ikco.png'))
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self.FirstWindow)
         
-
         self.db = QtSql.QSqlDatabase.addDatabase('QSQLITE')
         self.db.setDatabaseName('fieldlist.db')
         self.model = QtSql.QSqlTableModel()
@@ -34,36 +35,32 @@ class Controller:
         self.ui.pushButton_2.clicked.connect(self.updaterow)
         self.ui.pushButton_3.clicked.connect(self.delrow)
         self.ui.pushButton_4.clicked.connect(self.coming_back)
-        self.ui.pushButton_5.clicked.connect(self.Show_SecondWindow)
-        
+        self.ui.pushButton_5.clicked.connect(self.print_message)
         self.i = self.model.rowCount()
         self.ui.lcdNumber.display(self.i)
         print(self.ui.tableWidget.currentIndex().row())
 
-        self.readExcel()
-
         self.FirstWindow.show()
 
     def Show_SecondWindow(self):
-        
         self.SecondWindow = QtWidgets.QMainWindow()
         self.ui = Ui_Dialog()
         self.ui.setupUi(self.SecondWindow)
         # todo : create table for second window in database And delete creditor And create method for computing.
-        self.ui.btnDelete.clicked.connect(self.print_message)
+        self.ui.btnDelete.clicked.connect(self.print_message) 
         # todo : select from db.
         self.ui.lcdNumber.display(1555)
-
         self.SecondWindow.show()   
 
     def print_message(self):
         print('deleted!')
-
+        self.daily_stats()
 
     def coming_back(self):
+        self.model = QtSql.QSqlTableModel()
+        self.model.setTable('supply')
+        self.model.setEditStrategy(QtSql.QSqlTableModel.OnFieldChange)
         try:
-            record = self.model.record(self.ui.tableWidget.SelectRows())
-
             sqliteCon = sqlite3.connect('fieldlist.db')
             cursor = sqliteCon.cursor()
             print('connected to sqlite')
@@ -77,10 +74,8 @@ class Controller:
             sqliteCon.commit()
             print("Record Updated successfully ")
             cursor.close()
-
-            record.setValue("sj",0)
-            record.setValue("kg",kg)
-            self.model.setRecord(self.ui.tableWidget.SelectRows(), record)
+            self.model.select()
+            self.ui.tableWidget.setModel(self.model)
             
         except sqlite3.Error as error:
             print("Failed to update multiple records of sqlite table", error)
@@ -89,21 +84,54 @@ class Controller:
                 sqliteCon.close()
                 print("The SQLite connection is closed")
 
-    def readExcel(self):
-        df = pd.read_excel('data.xlsx')
-        # print(df['Row'][0])
+    def daily_stats(self):
+        df = pd.read_excel('ol.xlsx')
+        print('---------------------------------')
+        sqliteCon = sqlite3.connect('fieldlist.db')
+        cursor = sqliteCon.cursor()
+        print('connected to sqlite')
+        sql_read_query = "SELECT * from supply"
+        cursor.execute(sql_read_query)
+        result = cursor.fetchall()
         for i in df.index:
-            print(df['Description'][i])
+            for row in result:                
+                name_in_db   = row[1]
+                name_in_file = df['name'][i] 
+                basis = df['basis'][i]
+                if(name_in_db == name_in_file):
+                    # total_stats = 1500 => meal = 1300
+                    kgr = int(basis) * 10
+                    kgk = int(basis) * 20
+                    kg  = row[3]
+                    sjj = 0
+                    sjj = kgk - kgr
+                    kg  = int(kg)  - kgk
 
+                    sql_query = """UPDATE supply SET kg = ? , sj = ? WHERE id=?"""
+                    sj = row[2]
+                    sj = float(sj) + float(sjj)
+                    print('sj => ',sj)
+                    uid = int(row[0])
+                    cursor.execute(sql_query,(kg,int(sj),uid))
+                    print("Record Updated successfully ")
+
+        sqliteCon.commit()
+        cursor.close()
+        self.model = QtSql.QSqlTableModel()
+        self.model.setTable('supply')
+        self.model.setEditStrategy(QtSql.QSqlTableModel.OnFieldChange)
+                    
+        self.model.select()
+        self.ui.tableWidget.setModel(self.model)        
+        print('---------------------------------')
+        
     def addToDb(self):
         # todo: Validation
-        print(self.i)
         self.model.insertRows(self.i,1)
-        # supply et    
+        # et_name    
         self.model.setData(self.model.index(self.i,1),self.ui.lineEdit.text())
-        
         try:
-            # sj et
+            # sj_et
             # if self.ui.lineEdit.text() == 0 :
             self.model.setData(self.model.index(self.i,2), self.ui.lineEdit_2.text())
             # else:

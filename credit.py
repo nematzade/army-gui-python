@@ -77,5 +77,5 @@ class Ui_Dialog(object):
         self.credit_lable.setText(_translate("MainWindow", "مقدار طلبکاری از آمادگاه"))
         self.btnDelete.setText(_translate("MainWindow", "حذف"))
         self.btnUpdate.setText(_translate("MainWindow", "بروزرسانی"))
-        self.add.setText(_translate("MainWindow", "افزودن"))
+        self.add.setText(_translate("MainWindow", "ثبت"))
 
