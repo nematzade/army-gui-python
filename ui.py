@@ -79,6 +79,10 @@ class Ui_MainWindow(object):
         self.pushButton_5.setGeometry(QtCore.QRect(410, 10, 75, 23))
         self.pushButton_5.setObjectName("pushButton_5")
 
+        self.browse_btn = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
+        self.browse_btn.setGeometry(QtCore.QRect(510, 10, 75, 23))
+        self.browse_btn.setObjectName("browse_btn")
+
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -101,4 +105,5 @@ class Ui_MainWindow(object):
         self.pushButton_3.setText(_translate("MainWindow", "حذف"))
         self.pushButton_4.setText(_translate("MainWindow", "عودت"))
         self.pushButton_5.setText(_translate("MainWindow", "آمادگاه"))
+        self.browse_btn.setText(_translate("MainWindow", "فایل"))
 

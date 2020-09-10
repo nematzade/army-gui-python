@@ -1,10 +1,11 @@
 import sys
 from ui import *
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QTableView
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QTableView,QInputDialog,QFileDialog
 from PyQt5 import QtSql,QtCore,QtGui
 import pandas as pd
 import sqlite3
 from credit import *
+from pathlib import Path
 
 # https://www.learnpyqt.com/courses/packaging-and-distribution/packaging-pyqt5-pyside2-applications-windows-pyinstaller/
 # https://github.com/pyqt/examples
@@ -13,9 +14,8 @@ class Controller:
         pass
 
     def Show_FirstWindow(self):
-    
         self.FirstWindow = QtWidgets.QMainWindow()
-        self.FirstWindow.setWindowIcon(QtGui.QIcon('ikco.png'))
+        self.FirstWindow.setWindowIcon(QtGui.QIcon('aja.png'))
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self.FirstWindow)
         
@@ -30,16 +30,15 @@ class Controller:
         self.model.setHeaderData(2, QtCore.Qt.Vertical,"صرفه جویی")
         self.model.setHeaderData(3, QtCore.Qt.Vertical,"مقدار/تعداد")
         self.ui.tableWidget.setModel(self.model)
-
         self.ui.pushButton.clicked.connect(self.addToDb)
         self.ui.pushButton_2.clicked.connect(self.updaterow)
         self.ui.pushButton_3.clicked.connect(self.delrow)
         self.ui.pushButton_4.clicked.connect(self.coming_back)
-        self.ui.pushButton_5.clicked.connect(self.print_message)
+        self.ui.pushButton_5.clicked.connect(self.Show_SecondWindow)
+        self.ui.browse_btn.clicked.connect(self.browseSlot)
         self.i = self.model.rowCount()
         self.ui.lcdNumber.display(self.i)
         print(self.ui.tableWidget.currentIndex().row())
-
         self.FirstWindow.show()
 
     def Show_SecondWindow(self):
@@ -52,9 +51,22 @@ class Controller:
         self.ui.lcdNumber.display(1555)
         self.SecondWindow.show()   
 
+    def browseSlot(self):
+        options = QtWidgets.QFileDialog.Options()
+        options |= QtWidgets.QFileDialog.DontUseNativeDialog
+        file, _ = QtWidgets.QFileDialog.getOpenFileName(
+                        None,
+                        "QFileDialog.getOpenFileName()",
+                        "",
+                        "All Files (*);;Python Files (*.py)",
+                        options=options)
+        if file:
+            self.daily_stats(file)
+
+
     def print_message(self):
         print('deleted!')
-        self.daily_stats()
+        
 
     def coming_back(self):
         self.model = QtSql.QSqlTableModel()
@@ -76,7 +88,7 @@ class Controller:
             cursor.close()
             self.model.select()
             self.ui.tableWidget.setModel(self.model)
-            
+
         except sqlite3.Error as error:
             print("Failed to update multiple records of sqlite table", error)
         finally:
@@ -84,8 +96,8 @@ class Controller:
                 sqliteCon.close()
                 print("The SQLite connection is closed")
 
-    def daily_stats(self):
-        df = pd.read_excel('ol.xlsx')
+    def daily_stats(self,file):
+        df = pd.read_excel(file)
         print('---------------------------------')
         sqliteCon = sqlite3.connect('fieldlist.db')
         cursor = sqliteCon.cursor()
@@ -103,24 +115,20 @@ class Controller:
                     kgr = int(basis) * 10
                     kgk = int(basis) * 20
                     kg  = row[3]
-                    sjj = 0
-                    sjj = kgk - kgr
-                    kg  = int(kg)  - kgk
-
+                    frugality = 0
+                    frugality = kgk - kgr
+                    kg  = int(kg) - kgk
                     sql_query = """UPDATE supply SET kg = ? , sj = ? WHERE id=?"""
-                    sj = row[2]
-                    sj = float(sj) + float(sjj)
-                    print('sj => ',sj)
+                    sj  = row[2]
+                    sj  = float(sj) + float(frugality)
                     uid = int(row[0])
                     cursor.execute(sql_query,(kg,int(sj),uid))
                     print("Record Updated successfully ")
-
         sqliteCon.commit()
         cursor.close()
         self.model = QtSql.QSqlTableModel()
         self.model.setTable('supply')
         self.model.setEditStrategy(QtSql.QSqlTableModel.OnFieldChange)
-                    
         self.model.select()
         self.ui.tableWidget.setModel(self.model)        
         print('---------------------------------')
@@ -131,12 +139,7 @@ class Controller:
         # et_name    
         self.model.setData(self.model.index(self.i,1),self.ui.lineEdit.text())
         try:
-            # sj_et
-            # if self.ui.lineEdit.text() == 0 :
             self.model.setData(self.model.index(self.i,2), self.ui.lineEdit_2.text())
-            # else:
-                # در صورت خالی بودن ماخذ را گرفته و محاسبه نماید. باید دکمه اضافه شود
-                # self.model.setData(self.model.index(self.i,1),(1500 - 1300) * 2)
         except ValueError:
             QMessageBox.question(self,'اخطار', "مقدار صرفه جویی حتما باید به عدد وارد شود", QMessageBox.Ok)
 
@@ -144,7 +147,7 @@ class Controller:
             self.model.setData(self.model.index(self.i,3), int(self.ui.lineEdit_3.text()))
         except ValueError:
             QMessageBox.question(self,'اخطار', "مقدار/تعداد حتما باید به عدد وارد شود", QMessageBox.Ok)
-            
+
         self.model.submitAll()
         self.i += 1
         self.ui.lcdNumber.display(self.i)
