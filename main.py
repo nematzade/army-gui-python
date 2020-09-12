@@ -1,3 +1,4 @@
+from fbs_runtime.application_context.PyQt5 import ApplicationContext
 import sys
 from ui import *
 from PyQt5.QtWidgets import *
@@ -138,25 +139,29 @@ class Controller:
         result = cursor.fetchall()
         for i in df.index:
             for row in result:                
-                name_in_db   = row[1]
-                name_in_file = df['name'][i] 
-                basis = df['basis'][i]
-                # convert persian/Arabic digit to english number.
-                basis = self.convert_num(basis)
-                if(name_in_db == name_in_file):
-                    # total_stats = 1500 => meal = 1300
-                    kgr = int(basis) * 10
-                    kgk = int(basis) * 20
-                    kg  = row[3]
-                    frugality = 0
-                    frugality = kgk - kgr
-                    kg  = int(kg) - kgk
-                    sql_query = """UPDATE supply SET kg = ? , sj = ? WHERE id=?"""
-                    sj  = row[2]
-                    sj  = float(sj) + float(frugality)
-                    uid = int(row[0])
-                    cursor.execute(sql_query,(kg,int(sj),uid))
-                    print("Record Updated successfully ")
+                try:
+                    name_in_db   = row[1]
+                    name_in_file = df['name'][i]
+                    basis = df['basis'][i]
+                    # convert persian/Arabic digit to english number.
+                    basis = self.convert_num(basis)
+                    if(name_in_db == name_in_file):
+                        # total_stats = 1500 => meal = 1300
+                        kgr = int(basis) * 10
+                        kgk = int(basis) * 20
+                        kg  = row[3]
+                        frugality = 0
+                        frugality = kgk - kgr
+                        kg  = int(kg) - kgk
+                        sql_query = """UPDATE supply SET kg = ? , sj = ? WHERE id=?"""
+                        sj  = row[2]
+                        sj  = float(sj) + float(frugality)
+                        uid = int(row[0])
+                        cursor.execute(sql_query,(kg,int(sj),uid))
+                        print("Record Updated successfully ")
+                except Exception:
+                    self.show_dialog("فایل اکسل را مجددا بررسی کنید!")
+                    return
         sqliteCon.commit()
         cursor.close()
         self.model = QtSql.QSqlTableModel()
@@ -204,7 +209,6 @@ class Controller:
             # convert persian/Arabic digit to english number.
             le_2 = self.convert_num(sj)
             le_3 = self.convert_num(kg)
-            
             self.model.insertRows(self.i,1)
             # et_name    
             self.model.setData(self.model.index(self.i,1),self.ui.lineEdit.text())
@@ -257,3 +261,8 @@ if __name__ == '__main__':
     Controller = Controller()
     Controller.Show_FirstWindow()
     sys.exit(app.exec_())
+    # appctxt = ApplicationContext()
+    # Controller = Controller()
+    # Controller.Show_FirstWindow()
+    # exit_code = appctxt.app.exec_()      # 2. Invoke appctxt.app.exec_()
+    # sys.exit(exit_code)
