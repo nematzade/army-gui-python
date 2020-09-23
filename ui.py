@@ -96,8 +96,8 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "رکن چهارم مرکز آموزش دژآجا (شعبه خواروبار)"))
         self.groupBox.setTitle(_translate("MainWindow", "آمار روزانه یخچال"))
-        self.label.setText(_translate("MainWindow", "نام کالا"))
-        self.label_2.setText(_translate("MainWindow", "صرفه جویی"))
+        self.label.setText(_translate("MainWindow", "نام کالا/آمار کل"))
+        self.label_2.setText(_translate("MainWindow", "صرفه جویی/آمار وعده غذایی"))
         self.label_3.setText(_translate("MainWindow", "مقدار/تعداد"))
 
         self.pushButton.setText(_translate("MainWindow", "ثبت"))

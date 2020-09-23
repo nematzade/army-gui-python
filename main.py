@@ -7,6 +7,10 @@ import pandas as pd
 import sqlite3
 from credit import *
 from unidecode import unidecode
+from PyQt5.QtCore import QDir
+from PyQt5 import *
+import xlsxwriter
+from csv import writer
 
 # https://www.learnpyqt.com/courses/packaging-and-distribution/packaging-pyqt5-pyside2-applications-windows-pyinstaller/
 # https://github.com/pyqt/examples
@@ -52,6 +56,9 @@ class Controller:
         self.ui.lcdNumber.display(1555)
         self.SecondWindow.show()   
 
+    def print_message(self):
+        print("hello")
+
     # browse file 
     def browseSlot(self):
         options = QtWidgets.QFileDialog.Options()
@@ -64,14 +71,11 @@ class Controller:
                         options=options)
         if file:
             self.daily_stats(file)
+            # self.diet_compare(file)
 
-    def diet_compare(self):
+    def diet_compare(self,file):
         pass
 
-    # for Test
-    def print_message(self):
-        print('deleted!')
-    
     # convert persian/Arabic digit to english digit.
     def convert_num(self,num):
         cnum = unidecode(str(num))
@@ -104,29 +108,6 @@ class Controller:
                 sqliteCon.close()
                 print("The SQLite connection is closed")
 
-    # https://www.geeksforgeeks.org/pyqt5-input-dialog-python/
-    def takeinputs(self): 
-        name, done1 = QtWidgets.QInputDialog.getText( 
-             self, 'Input Dialog', 'Enter your name:')  
-  
-        roll, done2 = QtWidgets.QInputDialog.getInt( 
-           self, 'Input Dialog', 'Enter your roll:')
-  
-        cgpa, done3 = QtWidgets.QInputDialog.getDouble( 
-              self, 'Input Dialog', 'Enter your CGPA:') 
-  
-        langs =['C', 'c++', 'Java', 'Python', 'Javascript'] 
-        lang, done4 = QtWidgets.QInputDialog.getItem( 
-          self, 'Input Dialog', 'Language you know:', langs) 
-  
-        if done1 and done2 and done3 and done4 : 
-             # Showing confirmation message along 
-             # with information provided by user.  
-             print('Information stored Successfully\nName: '
-                                 +str(name)+'('+str(roll)+')'+'\n'+'CGPA: '
-                                 +str(cgpa)+'\nSelected Language: '+str(lang))
-             # Hide the pushbutton after inputs provided by the use. 
-            #  self.pushButton.hide()
 
     def daily_stats(self,file):
         df = pd.read_excel(file)
@@ -137,6 +118,13 @@ class Controller:
         sql_read_query = "SELECT * from supply"
         cursor.execute(sql_read_query)
         result = cursor.fetchall()
+        total_stats = self.ui.lineEdit.text()
+        meal = self.ui.lineEdit_2.text()
+        if total_stats == "" or meal == "":
+            self.show_dialog("اطلاعاتی وارد نشده! دوباره تلاس کنید.")
+        else:
+            total_stats = int(total_stats)
+            meal = int(meal)
         for i in df.index:
             for row in result:                
                 try:
@@ -146,9 +134,8 @@ class Controller:
                     # convert persian/Arabic digit to english number.
                     basis = self.convert_num(basis)
                     if(name_in_db == name_in_file):
-                        # total_stats = 1500 => meal = 1300
-                        kgr = int(basis) * 10
-                        kgk = int(basis) * 20
+                        kgr = int(basis) * meal
+                        kgk = int(basis) * total_stats
                         kg  = row[3]
                         frugality = 0
                         frugality = kgk - kgr
@@ -261,8 +248,3 @@ if __name__ == '__main__':
     Controller = Controller()
     Controller.Show_FirstWindow()
     sys.exit(app.exec_())
-    # appctxt = ApplicationContext()
-    # Controller = Controller()
-    # Controller.Show_FirstWindow()
-    # exit_code = appctxt.app.exec_()      # 2. Invoke appctxt.app.exec_()
-    # sys.exit(exit_code)
